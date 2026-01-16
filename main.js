@@ -438,8 +438,9 @@ function step() {
 
     // 1. Track Arrivals (Rolling Window)
     env.lanes[lane].recentArrivals.push(arrived);
-    if (env.lanes[lane].recentArrivals.length > 5) {
-      env.lanes[lane].recentArrivals.shift(); // Keep last 5 seconds
+    const windowSize = Math.max(5, 5 * simSpeed);
+    if (env.lanes[lane].recentArrivals.length > windowSize) {
+      env.lanes[lane].recentArrivals.shift(); // Scale window with speed
     }
   }
 
