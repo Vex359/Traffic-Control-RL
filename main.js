@@ -782,13 +782,12 @@ function initSettings() {
       };
     }
   }
-}
 
-if (speedInput) {
-  speedInput.oninput = function () {
-    simSpeed = Math.max(1, parseFloat(this.value) || 1);
-  };
-}
+  if (speedInput) {
+    speedInput.oninput = function () {
+      simSpeed = Math.max(1, parseFloat(this.value) || 1);
+    };
+  }
 }
 
 // Start Loops
