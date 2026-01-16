@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Traffic Light Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <div class="app-container">
+    <header>
+      <h1>Traffic Control AI</h1>
+      <p>Interactive Reinforcement Learning Visualizer</p>
+    </header>
+
+    <div class="content-row" style="display:flex; gap:20px; align-items:flex-start;">
+      <!-- Log Panel -->
+      <div id="ai-log" class="log-panel">
+        <div class="log-header">AI Decision Log</div>
+        <div id="log-content" class="log-content"></div>
+      </div>
+
+      <!-- Ambulance Stats Widget -->
+      <div class="stats-card-vertical">
+        <div class="score-label"
+          style="margin-bottom: 5px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 5px;">
+          AMBULANCE</div>
+        <div class="stat-item green">
+          <div class="stat-label">CROSSED</div>
+          <div id="stat-crossed" class="stat-value">0</div>
+        </div>
+        <div class="stat-item red">
+          <div class="stat-label">CRASHED</div>
+          <div id="stat-crashed" class="stat-value">0</div>
+        </div>
+        <div class="stat-item orange">
+          <div class="stat-label">WAITED</div>
+          <div id="stat-waited" class="stat-value">0</div>
+        </div>
+      </div>
+
+      <!-- Score Widget -->
+      <div class="score-card">
+        <div class="score-label">AI REWARD</div>
+        <div id="ai-score" class="score-value">0</div>
+      </div>
+
+      <!-- Avg Reward Widget -->
+      <div class="score-card avg-reward">
+        <div class="score-label">AVG / SEC</div>
+        <div id="avg-reward" class="score-value">0.00</div>
+      </div>
+
+      <div class="main-card">
+        <div class="canvas-wrapper">
+          <div id="sim-timer">00:00:00</div>
+          <canvas id="canvas" width="400" height="400"></canvas>
+        </div>
+
+        <aside class="controls-panel">
+          <div id="stats" class="stats-box"></div>
+          <button id="resetBtn" class="btn-primary">
+            <span class="icon">↻</span> Reset Simulation
+          </button>
+          <button id="pauseBtn" class="btn-secondary">
+            <span class="icon">⏸</span> Pause
+          </button>
+        </aside>
+      </div>
+
+    </div> <!-- End content-row -->
+
+  </div>
+
+  <script src="main.js"></script>
+</body>
+
+</html>
