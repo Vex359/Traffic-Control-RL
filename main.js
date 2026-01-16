@@ -320,8 +320,7 @@ function step() {
   if (isPaused) return;
 
   // --- EMERGENCY SPAWN LOGIC ---
-  // Scale probability by /simSpeed because we run multiple steps per second
-  if (!env.emergency.active && Math.random() < (0.03 / simSpeed)) {
+  if (!env.emergency.active && Math.random() < 0.03) {
     const lanes = ["north", "south", "east", "west"];
     env.emergency.active = true;
 
@@ -416,16 +415,15 @@ function step() {
 
   for (let lane in env.lanes) {
     let arrived = 0;
-    // Scale probability by /simSpeed
-    let spawnRate = ARRIVAL_PROBABILITY / simSpeed;
+    let spawnRate = ARRIVAL_PROBABILITY;
 
     // Burst Logic
     if (env.bursts[lane] > 0) {
       spawnRate = 0.8; // High traffic during burst
       env.bursts[lane]--;
     } else {
-      // Chance to start a burst
-      if (Math.random() < (0.008 / simSpeed)) {
+      // Chance to start a burst (0.8% chance)
+      if (Math.random() < 0.008) {
         env.bursts[lane] = 10 + Math.floor(Math.random() * 10); // 10-20s burst
       }
     }
