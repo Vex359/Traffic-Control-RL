@@ -10,8 +10,10 @@ const statWaited = document.getElementById("stat-waited");
 const avgRewardEl = document.getElementById("avg-reward");
 const pauseBtn = document.getElementById("pauseBtn");
 const simTimer = document.getElementById("sim-timer");
+const speedInput = document.getElementById("sim-speed-input");
 
 let isPaused = false;
+let simSpeed = 1;
 let totalSessionTime = parseInt(localStorage.getItem("TOTAL_SESSION_TIME")) || 5000;
 // Starting at 1h 23m 20s (5000s) if no saved time exists
 
@@ -68,7 +70,9 @@ class VisualCar {
   constructor(lane, isAmbulance = false) {
     this.lane = lane;
     this.isAmbulance = isAmbulance;
-    this.speed = isAmbulance ? 4 : (2 + Math.random() * 1.5); // Ambulance is faster
+    // Base speeds multiplied by simSpeed
+    this.baseSpeed = isAmbulance ? 4 : (2 + Math.random() * 1.5);
+    this.speed = this.baseSpeed * simSpeed;
     this.stopped = false;
     this.color = isAmbulance ? "#ffffff" : `hsl(${Math.random() * 360}, 70%, 50%)`;
 
@@ -144,6 +148,7 @@ class VisualCar {
 
     // Move
     if (!this.stopped) {
+      this.speed = this.baseSpeed * simSpeed; // Sync speed with multiplier
       this.x += this.dx * this.speed;
       this.y += this.dy * this.speed;
     }
@@ -315,7 +320,8 @@ function step() {
   if (isPaused) return;
 
   // --- EMERGENCY SPAWN LOGIC ---
-  if (!env.emergency.active && Math.random() < 0.03) {
+  // Scale probability by /simSpeed because we run multiple steps per second
+  if (!env.emergency.active && Math.random() < (0.03 / simSpeed)) {
     const lanes = ["north", "south", "east", "west"];
     env.emergency.active = true;
 
@@ -410,15 +416,16 @@ function step() {
 
   for (let lane in env.lanes) {
     let arrived = 0;
-    let spawnRate = ARRIVAL_PROBABILITY;
+    // Scale probability by /simSpeed
+    let spawnRate = ARRIVAL_PROBABILITY / simSpeed;
 
     // Burst Logic
     if (env.bursts[lane] > 0) {
       spawnRate = 0.8; // High traffic during burst
       env.bursts[lane]--;
     } else {
-      // Chance to start a burst (0.8% chance)
-      if (Math.random() < 0.008) {
+      // Chance to start a burst
+      if (Math.random() < (0.008 / simSpeed)) {
         env.bursts[lane] = 10 + Math.floor(Math.random() * 10); // 10-20s burst
       }
     }
@@ -777,9 +784,25 @@ function initSettings() {
   }
 }
 
+if (speedInput) {
+  speedInput.oninput = function () {
+    simSpeed = Math.max(1, parseFloat(this.value) || 1);
+  };
+}
+}
+
 // Start Loops
 initSettings();
-setInterval(step, 1000); // Logic every 1s
+
+// Logic loop runs every 1s, but steps 'simSpeed' times
+setInterval(() => {
+  if (!isPaused) {
+    for (let i = 0; i < simSpeed; i++) {
+      step();
+    }
+  }
+}, 1000);
+
 requestAnimationFrame(animate); // Visuals at 60fps
 
 // Load Q-table on startup

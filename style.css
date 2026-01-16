@@ -352,6 +352,35 @@ canvas:hover {
   text-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
 }
 
+.speed-widget {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.speed-widget input {
+  width: 60px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #4CAF50;
+  padding: 4px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.speed-widget input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
 @keyframes blink {
   0% {
     opacity: 1;
