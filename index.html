@@ -75,9 +75,44 @@
         </aside>
       </div>
 
-    </div> <!-- End content-row -->
+      <!-- Penalty Configuration Panel -->
+      <div class="settings-panel">
+        <div class="settings-header">
+          <span class="icon">⚙️</span> Penalty Config
+        </div>
+        <div class="settings-grid">
+          <div class="setting-item">
+            <label for="reward-car-passed">Car Passed (+)</label>
+            <input type="number" id="reward-car-passed" value="1">
+          </div>
+          <div class="setting-item">
+            <label for="reward-car-waiting">Car Waiting (-)</label>
+            <input type="number" id="reward-car-waiting" value="-1">
+          </div>
+          <div class="setting-item">
+            <label for="reward-amb-passed">Amb. Passed (+)</label>
+            <input type="number" id="reward-amb-passed" value="5">
+          </div>
+          <div class="setting-item">
+            <label for="reward-amb-waiting">Amb. Waiting (-)</label>
+            <input type="number" id="reward-amb-waiting" value="-200">
+          </div>
+          <div class="setting-item">
+            <label for="reward-amb-crash">Amb. Crash (-)</label>
+            <input type="number" id="reward-amb-crash" value="-500">
+          </div>
+          <div class="setting-item">
+            <label for="reward-switch">Phase Switch (-)</label>
+            <input type="number" id="reward-switch" value="-2">
+          </div>
+        </div>
+        <div class="settings-footer">
+          Values update in real-time
+        </div>
+      </div>
 
-  </div>
+    </div> <!-- End content-row -->
+  </div> <!-- End app-container -->
 
   <script src="main.js"></script>
 </body>

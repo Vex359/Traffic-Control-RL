@@ -53,6 +53,16 @@ let prevState = null; // Track previous state for learning
 let prevAction = null;
 let prevReward = 0;
 
+// ---------- PENALTY / REWARD CONFIG ----------
+const REWARDS = {
+  CAR_PASSED: 1,
+  CAR_WAITING: -1,
+  AMBULANCE_PASSED: 5,
+  AMBULANCE_WAITING: -200,
+  AMBULANCE_CRASH: -500,
+  PHASE_SWITCH: -2
+};
+
 // ---------- CLASS: VISUAL CAR ----------
 class VisualCar {
   constructor(lane, isAmbulance = false) {
@@ -290,7 +300,7 @@ function setPhase(phase) {
 
   // Reward Penalty for switching (Removed if ambulance is waiting)
   if (!env.emergency || !env.emergency.active) {
-    env.cumulativeReward -= 2;
+    env.cumulativeReward += REWARDS.PHASE_SWITCH;
   }
 
   for (let lane in env.lanes) {
@@ -346,9 +356,9 @@ function step() {
 
     // 1. Reward Shaping
     if (isGreen) {
-      env.cumulativeReward += 5; // Good job, letting it through
+      env.cumulativeReward += REWARDS.AMBULANCE_PASSED; // Good job, letting it through
     } else {
-      env.cumulativeReward -= 200; // Bad, blocking emergency! (Increased penalty)
+      env.cumulativeReward += REWARDS.AMBULANCE_WAITING; // Bad, blocking emergency! (Increased penalty)
 
       // 2. Collision Risk Calculation
       // If ambulance is on RED, and the crossing street is GREEN
@@ -370,7 +380,7 @@ function step() {
 
       if (crossingHasTraffic && Math.random() < 0.3) {
         logAI(`[CRASH] 💥 Ambulance collided!`, "alert"); // Red alert?
-        env.cumulativeReward -= 500;
+        env.cumulativeReward += REWARDS.AMBULANCE_CRASH;
 
         env.emergencyStats.crashed++;
         env.emergency.crashed = true;
@@ -437,7 +447,7 @@ function step() {
       env.lanes[lane].queue -= passed;
 
       // Reward Throughput: +1 per car passed
-      env.cumulativeReward += passed;
+      env.cumulativeReward += (passed * REWARDS.CAR_PASSED);
     }
   }
 
@@ -448,7 +458,7 @@ function step() {
   env.totalWait += totalQueue;
 
   // Update Reward: -1 per waiting car
-  env.cumulativeReward -= totalQueue;
+  env.cumulativeReward += (totalQueue * REWARDS.CAR_WAITING);
 
   env.time++;
   totalSessionTime++; // Increment persistent timer
@@ -742,7 +752,33 @@ pauseBtn.onclick = function () {
   }
 };
 
+// ---------- SETTINGS SYNC ----------
+function initSettings() {
+  const settingsMap = {
+    "reward-car-passed": "CAR_PASSED",
+    "reward-car-waiting": "CAR_WAITING",
+    "reward-amb-passed": "AMBULANCE_PASSED",
+    "reward-amb-waiting": "AMBULANCE_WAITING",
+    "reward-amb-crash": "AMBULANCE_CRASH",
+    "reward-switch": "PHASE_SWITCH"
+  };
+
+  for (let id in settingsMap) {
+    const el = document.getElementById(id);
+    if (el) {
+      // Set initial value
+      el.value = REWARDS[settingsMap[id]];
+      // Listen for changes
+      el.oninput = function () {
+        REWARDS[settingsMap[id]] = parseFloat(this.value) || 0;
+        console.log(`Updated ${settingsMap[id]} to ${REWARDS[settingsMap[id]]}`);
+      };
+    }
+  }
+}
+
 // Start Loops
+initSettings();
 setInterval(step, 1000); // Logic every 1s
 requestAnimationFrame(animate); // Visuals at 60fps
 
