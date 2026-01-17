@@ -109,6 +109,57 @@ canvas:hover {
   gap: 20px;
 }
 
+.control-mode-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.control-mode-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.segmented-control {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+  border-radius: 8px;
+  gap: 2px;
+}
+
+.mode-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 6px 0;
+  font-family: var(--font-main);
+  font-weight: 600;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.mode-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mode-btn.active {
+  background: var(--accent-color);
+  color: white;
+  box-shadow: 0 4px 10px var(--accent-glow);
+}
+
 .stats-box {
   font-family: var(--font-mono);
   font-size: 13px;
@@ -359,26 +410,29 @@ canvas:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
 }
 
-.speed-widget input {
-  width: 60px;
-  background: rgba(0, 0, 0, 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
-  color: #4CAF50;
-  padding: 4px;
+.speed-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  padding: 4px 8px;
   font-family: var(--font-mono);
-  font-size: 14px;
-  text-align: center;
-  font-weight: bold;
+  font-weight: 700;
+  font-size: 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
 }
 
-.speed-widget input:focus {
-  outline: none;
-  border-color: var(--accent-color);
-  box-shadow: 0 0 10px var(--accent-glow);
+.speed-btn:hover {
+  color: #fff;
+}
+
+.speed-btn.active {
+  background: var(--accent-color);
+  color: white;
 }
 
 @keyframes blink {

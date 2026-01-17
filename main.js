@@ -14,6 +14,7 @@ const speedInput = document.getElementById("sim-speed-input");
 
 let isPaused = false;
 let simSpeed = 1;
+let controlMode = "AI"; // "AI", "20s", "30s"
 let totalSessionTime = parseInt(localStorage.getItem("TOTAL_SESSION_TIME")) || 5000;
 // Starting at 1h 23m 20s (5000s) if no saved time exists
 
@@ -46,7 +47,7 @@ const VISUAL_SPAWN_RATE = 0.008;
 
 // ---------- Q-LEARNING CONFIG ----------
 const ACTIONS = ["EXTEND", "SWITCH"];
-const EPSILON = 0.1;  // Exploration rate (10% random actions)
+let EPSILON = 0.05;  // Exploration rate (5% random actions)
 const ALPHA = 0.1;    // Learning rate
 const GAMMA = 0.9;    // Discount factor (future reward importance)
 
@@ -457,7 +458,13 @@ function step() {
     }
   }
 
-  qLearningAgent(); // 👈 Q-Learning AI decides here
+  if (controlMode === "AI") {
+    qLearningAgent(); // 👈 Q-Learning AI decides here
+  } else if (controlMode === "20s") {
+    staticCycleAgent(20);
+  } else if (controlMode === "30s") {
+    staticCycleAgent(30);
+  }
 
   // Data Logging: Accumulate current queues into total wait
   const totalQueue = env.lanes.north.queue + env.lanes.south.queue + env.lanes.east.queue + env.lanes.west.queue;
@@ -530,6 +537,16 @@ function loadQ() {
     }
   } catch (e) {
     console.warn("Could not load Q-table:", e);
+  }
+}
+
+// Static Cycle Agent: Switches phases based on a fixed timer
+function staticCycleAgent(cycleSeconds) {
+  // Only switch at exactly cycleSeconds
+  if (env.timeSinceSwitch >= cycleSeconds) {
+    const nextPhase = env.currentPhase === "NS" ? "EW" : "NS";
+    setPhase(nextPhase);
+    logAI(`[STATIC] Cycle limit reached (${cycleSeconds}s). Switching to ${nextPhase}`, "switch");
   }
 }
 
@@ -676,12 +693,11 @@ function updateStats() {
   `;
 
   if (scoreEl) {
-    scoreEl.innerText = env.cumulativeReward;
+    scoreEl.innerText = env.cumulativeReward.toFixed(2);
     // Color code: Green if > -500, Yellow > -2000, Red otherwise
     if (env.cumulativeReward > -500) scoreEl.style.color = "#4CAF50";
     else if (env.cumulativeReward > -2000) scoreEl.style.color = "#FFC107";
     else scoreEl.style.color = "#FF5252";
-
   }
 
   if (statCrossed) statCrossed.innerText = env.emergencyStats ? env.emergencyStats.crossed : 0;
@@ -758,6 +774,26 @@ pauseBtn.onclick = function () {
   }
 };
 
+// Control Mode Toggle Listeners
+document.querySelectorAll('.mode-btn').forEach(btn => {
+  btn.onclick = function () {
+    const mode = this.getAttribute('data-mode');
+    if (controlMode === mode) return;
+
+    // Update state
+    controlMode = mode;
+
+    // Update UI
+    document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+
+    logAI(`[SYSTEM] Control Mode changed to ${mode.toUpperCase()}`, "normal");
+
+    // If switching to static, we might want to reset the switch timer 
+    // to ensure a full cycle starts from now, but setPhase handles the switch.
+  };
+});
+
 // ---------- SETTINGS SYNC ----------
 function initSettings() {
   const settingsMap = {
@@ -782,11 +818,28 @@ function initSettings() {
     }
   }
 
-  if (speedInput) {
-    speedInput.oninput = function () {
-      simSpeed = Math.max(1, parseFloat(this.value) || 1);
+  const epsilonInput = document.getElementById("setting-epsilon");
+  if (epsilonInput) {
+    epsilonInput.value = EPSILON;
+    epsilonInput.oninput = function () {
+      EPSILON = Math.max(0, Math.min(1, parseFloat(this.value) || 0));
+      console.log(`Updated EPSILON to ${EPSILON}`);
     };
   }
+
+  // Speed Toggle Listeners
+  document.querySelectorAll('.speed-btn').forEach(btn => {
+    btn.onclick = function () {
+      const speed = parseFloat(this.getAttribute('data-speed'));
+      simSpeed = speed;
+
+      // Update UI
+      document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+
+      console.log(`Simulation Speed set to ${speed}x`);
+    };
+  });
 }
 
 // Start Loops

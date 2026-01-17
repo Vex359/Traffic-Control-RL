@@ -46,7 +46,10 @@
         </div>
         <div class="speed-widget">
           <div class="stat-label">SPEED</div>
-          <input type="number" id="sim-speed-input" value="1" min="1" max="100">
+          <div class="segmented-control speed-toggle">
+            <button class="speed-btn active" data-speed="1">1x</button>
+            <button class="speed-btn" data-speed="5">5x</button>
+          </div>
         </div>
       </div>
 
@@ -69,6 +72,14 @@
         </div>
 
         <aside class="controls-panel">
+          <div class="control-mode-container">
+            <div class="control-mode-label">CONTROL MODE</div>
+            <div class="segmented-control">
+              <button id="modeAI" class="mode-btn active" data-mode="AI">AI</button>
+              <button id="mode20s" class="mode-btn" data-mode="20s">20s</button>
+              <button id="mode30s" class="mode-btn" data-mode="30s">30s</button>
+            </div>
+          </div>
           <div id="stats" class="stats-box"></div>
           <button id="resetBtn" class="btn-primary">
             <span class="icon">↻</span> Reset Simulation
@@ -108,6 +119,10 @@
           <div class="setting-item">
             <label for="reward-switch">Phase Switch (-)</label>
             <input type="number" id="reward-switch" value="-2">
+          </div>
+          <div class="setting-item">
+            <label for="setting-epsilon">AI Epsilon (0-1)</label>
+            <input type="number" id="setting-epsilon" value="0.05" step="0.01" min="0" max="1">
           </div>
         </div>
         <div class="settings-footer">
