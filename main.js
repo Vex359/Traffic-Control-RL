@@ -523,17 +523,19 @@ function updateQ(pState, action, reward, nState) {
   Q[pState][action] += ALPHA * (reward + GAMMA * bestNext - Q[pState][action]);
 }
 
-// Persistence: Save Q-table to localStorage
+// Persistence: Save Q-table and Settings to localStorage
 function saveQ() {
   try {
     localStorage.setItem("TRAFFIC_Q_TABLE", JSON.stringify(Q));
     localStorage.setItem("TOTAL_SESSION_TIME", totalSessionTime);
+    localStorage.setItem("TRAFFIC_REWARDS", JSON.stringify(REWARDS));
+    localStorage.setItem("TRAFFIC_EPSILON", EPSILON);
   } catch (e) {
     console.warn("Could not save to localStorage:", e);
   }
 }
 
-// Persistence: Load Q-table from localStorage
+// Persistence: Load Q-table and Settings from localStorage
 function loadQ() {
   try {
     const data = localStorage.getItem("TRAFFIC_Q_TABLE");
@@ -541,8 +543,20 @@ function loadQ() {
       Q = JSON.parse(data);
       console.log("Q-table loaded:", Object.keys(Q).length, "states");
     }
+
+    const rewardsData = localStorage.getItem("TRAFFIC_REWARDS");
+    if (rewardsData) {
+      Object.assign(REWARDS, JSON.parse(rewardsData));
+      console.log("Rewards config loaded");
+    }
+
+    const epsilonData = localStorage.getItem("TRAFFIC_EPSILON");
+    if (epsilonData) {
+      EPSILON = parseFloat(epsilonData);
+      console.log("Epsilon loaded:", EPSILON);
+    }
   } catch (e) {
-    console.warn("Could not load Q-table:", e);
+    console.warn("Could not load Q-table or settings:", e);
   }
 }
 
@@ -820,6 +834,7 @@ function initSettings() {
       el.oninput = function () {
         REWARDS[settingsMap[id]] = parseFloat(this.value) || 0;
         console.log(`Updated ${settingsMap[id]} to ${REWARDS[settingsMap[id]]}`);
+        saveQ(); // Persist immediately
       };
     }
   }
@@ -830,6 +845,7 @@ function initSettings() {
     epsilonInput.oninput = function () {
       EPSILON = Math.max(0, Math.min(1, parseFloat(this.value) || 0));
       console.log(`Updated EPSILON to ${EPSILON}`);
+      saveQ(); // Persist immediately
     };
   }
 
@@ -849,6 +865,8 @@ function initSettings() {
 }
 
 // Start Loops
+// Load saved data before UI initialization
+loadQ();
 initSettings();
 
 // Logic loop runs every 1s, but steps 'simSpeed' times
@@ -861,9 +879,6 @@ setInterval(() => {
 }, 1000);
 
 requestAnimationFrame(animate); // Visuals at 60fps
-
-// Load Q-table on startup
-loadQ();
 
 // Auto-save Q-table every 10 seconds
 // Auto-save Q-table every 10 seconds
