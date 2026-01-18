@@ -63,7 +63,8 @@ const REWARDS = {
   AMBULANCE_PASSED: 5,
   AMBULANCE_WAITING: -200,
   AMBULANCE_CRASH: -500,
-  PHASE_SWITCH: -2
+  PHASE_SWITCH: -2,
+  OVER_EXTEND_PUNISHMENT: -0.5
 };
 
 // ---------- CLASS: VISUAL CAR ----------
@@ -472,6 +473,11 @@ function step() {
 
   // Update Reward: -1 per waiting car
   env.cumulativeReward += (totalQueue * REWARDS.CAR_WAITING);
+
+  // Soft punishment for over-extending (Prevents infinite holding)
+  if (env.timeSinceSwitch > 30) {
+    env.cumulativeReward += REWARDS.OVER_EXTEND_PUNISHMENT;
+  }
 
   env.time++;
   totalSessionTime++; // Increment persistent timer
