@@ -11,6 +11,11 @@ const avgRewardEl = document.getElementById("avg-reward");
 const pauseBtn = document.getElementById("pauseBtn");
 const simTimer = document.getElementById("sim-timer");
 const speedInput = document.getElementById("sim-speed-input");
+const exportBtn = document.getElementById("exportBtn");
+const importBtn = document.getElementById("importBtn");
+const fileInput = document.getElementById("fileInput");
+
+let trainingDirHandle = null;
 
 let isPaused = false;
 let simSpeed = 1;
@@ -605,6 +610,107 @@ function qLearningAgent() {
   prevState = currentState;
   prevAction = action;
   prevReward = env.cumulativeReward;
+
+  // Auto-save to localStorage (session backup)
+  saveQ();
+}
+
+// Export Q-table to a JSON file
+async function exportQToFile() {
+  const data = {
+    Q: Q,
+    EPSILON: EPSILON,
+    REWARDS: REWARDS,
+    TOTAL_SESSION_TIME: totalSessionTime,
+    timestamp: new Date().toISOString()
+  };
+
+  const fileName = `traffic_q_table_${new Date().getTime()}.json`;
+
+  // --- OPTION 1: Local Save Server (Node.js) ---
+  try {
+    const response = await fetch('http://localhost:3000/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (response.ok) {
+      logAI(`[SYSTEM] Saved to Training_data/ via server`, "normal");
+      return;
+    }
+  } catch (err) {
+    // Server probably not running, move to next option
+    console.log("Local save server not detected. Trying browser APIs...");
+  }
+
+  // --- OPTION 2: File System Access API ---
+  if (window.showDirectoryPicker) {
+    if (!trainingDirHandle) {
+      if (confirm("Would you like to link the 'Training_data' folder for direct saving?")) {
+        try {
+          trainingDirHandle = await window.showDirectoryPicker();
+          logAI("[SYSTEM] Training folder linked.", "normal");
+        } catch (err) {
+          console.warn("Directory picker cancelled or failed:", err);
+        }
+      }
+    }
+
+    if (trainingDirHandle) {
+      try {
+        const fileHandle = await trainingDirHandle.getFileHandle(fileName, { create: true });
+        const writable = await fileHandle.createWritable();
+        await writable.write(JSON.stringify(data, null, 2));
+        await writable.close();
+        logAI(`[SYSTEM] Saved to linked folder: ${fileName}`, "normal");
+        return; // Success!
+      } catch (err) {
+        console.error("Failed to save to linked folder:", err);
+        logAI("[ERROR] Could not save to folder. Falling back to download.", "alert");
+      }
+    }
+  }
+
+  // Fallback: Standard Download
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  a.click();
+  URL.revokeObjectURL(url);
+  logAI("[SYSTEM] Q-table exported via download", "normal");
+}
+
+// Import Q-table from a JSON file
+function importQFromFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (data.Q) {
+        Q = data.Q;
+        if (data.EPSILON !== undefined) EPSILON = data.EPSILON;
+        if (data.REWARDS) Object.assign(REWARDS, data.REWARDS);
+        if (data.TOTAL_SESSION_TIME !== undefined) totalSessionTime = data.TOTAL_SESSION_TIME;
+
+        logAI(`[SYSTEM] Imported Q-table (${Object.keys(Q).length} states)`, "normal");
+        console.log("Q-table imported successfully");
+        updateStats();
+        // Sync to localStorage after import
+        saveQ();
+      } else {
+        alert("Invalid Q-table file format.");
+      }
+    } catch (err) {
+      console.error("Error parsing JSON:", err);
+      alert("Error loading Q-table file.");
+    }
+  };
+  reader.readAsText(file);
 }
 
 // Throttling for logs to prevent spam
@@ -800,19 +906,17 @@ document.querySelectorAll('.mode-btn').forEach(btn => {
     const mode = this.getAttribute('data-mode');
     if (controlMode === mode) return;
 
-    // Update state
     controlMode = mode;
-
-    // Update UI
     document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
     this.classList.add('active');
-
-    logAI(`[SYSTEM] Control Mode changed to ${mode.toUpperCase()}`, "normal");
-
-    // If switching to static, we might want to reset the switch timer 
-    // to ensure a full cycle starts from now, but setPhase handles the switch.
+    logAI(`[SYSTEM] Control Mode: ${mode}`, "normal");
   };
 });
+
+// Export/Import Event Listeners
+if (exportBtn) exportBtn.onclick = exportQToFile;
+if (importBtn) importBtn.onclick = () => fileInput.click();
+if (fileInput) fileInput.onchange = importQFromFile;
 
 // ---------- SETTINGS SYNC ----------
 function initSettings() {

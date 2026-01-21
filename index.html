@@ -128,6 +128,22 @@
         <div class="settings-footer">
           Values update in real-time
         </div>
+
+        <div class="persistence-panel"
+          style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);">
+          <div class="settings-header" style="margin-bottom: 10px;">
+            <span class="icon">💾</span> Model Storage
+          </div>
+          <div style="display: flex; gap: 10px; flex-direction: column;">
+            <button id="exportBtn" class="btn-secondary" style="width: 100%; justify-content: center;">
+              <span class="icon">📤</span> Export to JSON
+            </button>
+            <button id="importBtn" class="btn-secondary" style="width: 100%; justify-content: center;">
+              <span class="icon">📥</span> Import from JSON
+            </button>
+            <input type="file" id="fileInput" accept=".json" style="display: none;">
+          </div>
+        </div>
       </div>
 
     </div> <!-- End content-row -->
