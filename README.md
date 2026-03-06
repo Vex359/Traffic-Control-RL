@@ -20,6 +20,15 @@ The goal was to answer:
 
 ---
 
+
+Steps to use:
+
+1. Run the "index.html" file.
+2. Import the "Optimal_-25.19.json" file
+3. And watch the AI control the traffic in the most optimal way.
+
+---
+
 🧠 Project Journey (How it evolved)
 
 1️⃣ Phase 1 — Rule-based Simulation
